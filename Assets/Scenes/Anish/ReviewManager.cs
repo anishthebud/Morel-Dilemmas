@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public class ReviewManager : MonoBehaviour
 {
     public static ReviewManager Instance { get; private set; }
-    public CustomerReview[] reviewDict;
-    public List<CustomerReview> currentReviews = new List<CustomerReview>();
-    public int dayNumber;
+    public CustomerReview[] allReviews; // Stores all of the possible reviews
+    public List<CustomerReview> currentReviews = new List<CustomerReview>(); // Stores the reviews for the game day
+    public int dayNumber; // Variable that signifies what day in the game it is
 
     void Awake()
     {
@@ -17,40 +17,56 @@ public class ReviewManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        reviewDict = Resources.LoadAll<CustomerReview>(""); // Change the path when resources get migrated
+        allReviews = Resources.LoadAll<CustomerReview>("Reviews"); // Loads in the reviews from the resources folder
     }
 
+    /// <summary>
+    /// This function gets called from the Customer Manager when a customer leaves their table.
+    /// The function calls the AddReview function that will add it to current reviews.
+    /// Right now, it randomly assigns the rating, but this will change once more information is introduced.
+    /// </summary>
     public void HandleCustomerRemoved()
     {
-        // Currently a randomly generated number, but will change once dishes are stored
         float starsGiven = Random.Range(1, 5 + 1);
         AddReview(starsGiven);
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    /// <summary>
+    /// When the manager runs up, it will set the day number to zero to signify a new game.
+    /// </summary>
     void Start()
     {
-        // Start anew for each day (reset the current reviews back to empty after each day)
         dayNumber = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Get the call from the CustomerManager to add the review to the list after a customer has left
         
     }
 
+    /// <summary>
+    /// When it is time for a game day to be advanced, this function will be called.
+    /// It also clears the current reviews and the reviews in the review ticker.
+    /// </summary>
     void NextDay()
     {
         dayNumber += 1;
+        currentReviews.Clear();
         ReviewTicker.Instance.reviews.Clear();
     }
 
+    /// <summary>
+    /// For the amount of starsGiven for the function, it will go through
+    /// all of the reviews loaded and pick out all the reviews that have the
+    /// same rating as provided. After this, it will randomly select a review
+    /// from that list and then add that review to the current reviews and the ticker.
+    /// </summary>
+    /// <param name="starsGiven"></param>
     void AddReview(float starsGiven)
     {
         List<CustomerReview> potentialReviews = new List<CustomerReview>();
-        foreach (CustomerReview review in reviewDict)
+        foreach (CustomerReview review in allReviews)
         {
             if (Mathf.Approximately(review.starsGiven, starsGiven))
             {

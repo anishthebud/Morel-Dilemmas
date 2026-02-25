@@ -26,6 +26,18 @@ public class CustomerManager : MonoBehaviour
     public List<GameObject> possibleCustomers = new List<GameObject>();  // could be stored in customer spawner as well but i didnt wanna keep reloading the info
     public Dictionary<CustomerType, GameObject> customerTypeToGameObject = new Dictionary<CustomerType, GameObject>();
 
+    [ContextMenu("test customer remove 0")]
+    void RemoveCustomer0()
+    {
+        RemoveCustomer(0);
+    }
+
+    [ContextMenu("test customer remove 1")]
+    void RemoveCustomer1()
+    {
+        RemoveCustomer(1);
+    }
+    
     public void Awake()
     {
         SetupDictionary();
@@ -70,6 +82,13 @@ public class CustomerManager : MonoBehaviour
         activeCustomers[tableIndex] = new CustomerInfo(customerType, tableIndex, takenOrder);
     }
 
+    /// <summary>
+    /// The RemoveCustomer function removes a customer by taking them out from a certain table.
+    /// Before removing the customer, it checks to see if there is a customer at the table.
+    /// If there is, then the HandleCustomerRemoved() function will be called from the ReviewManager.
+    /// Will calculate a rating for the dish once that has been implemented
+    /// </summary>
+    /// <param name="tableIndex"></param>
     public void RemoveCustomer(int tableIndex)
     {
         var customer = activeCustomers[tableIndex];
