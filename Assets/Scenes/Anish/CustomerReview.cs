@@ -1,3 +1,9 @@
-// Designate a rating based on the dish
-// Assign a random customer review for that dish and rating
-// Add it to storage for the player so that they can see it
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "CustomerReview", menuName = "Scriptable Objects/CustomerReview")]
+public class CustomerReview : ScriptableObject
+{
+    [Range(0f, 5f)]
+    public float starsGiven;
+    public string writtenReview;
+}

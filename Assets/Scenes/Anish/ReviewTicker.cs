@@ -1,10 +1,13 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ReviewTicker : MonoBehaviour
 {
+    public static ReviewTicker Instance { get; private set; }
+
     public ReviewItem reviewPrefab;
     public float reviewDuration = 4.0f;
-    public string[] reviews;
+    public List<CustomerReview> reviews = null;
 
     float width;
     float pixelsPerSecond;
@@ -14,36 +17,79 @@ public class ReviewTicker : MonoBehaviour
 
     void Awake()
     {
-        // Load in all of the current reviews
-        // Format each review to contain displayable information
-        // Combine each review into a massive string that can be looped over
-        // Potentially might need to create some other asset or use another object for the ScrollBar itselfs
+        if (Instance == null)
+        {
+            Instance = this;
+        } else
+        {
+            Destroy(gameObject);
+        }
+        TryAssignReviewsFromManager();
     }
 
     void Start()
     {
-        // Give the Review Crawl motion to start moving
+        TryAssignReviewsFromManager();
+
         width = GetComponent<RectTransform>().rect.width;
         pixelsPerSecond = width / reviewDuration;
-        AddToTicker(reviews[0]);
+        if (reviews != null && reviews.Count > 0)
+        {
+            AddToTicker(reviews[0]);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+
         // "Move" the text from right to left (looping back if end of string is reached)
-        if ((currReview.GetWidth != 0) && (currReview.GetXPosition <= -currReview.GetWidth))
+        if (currReview != null && (currReview.GetWidth != 0) && (currReview.GetXPosition <= -currReview.GetWidth) && reviews != null && reviews.Count > 0)
         {
-            Debug.Log(currReview.GetXPosition);
-            Debug.Log(-currReview.GetWidth);
-            rightIndex = (rightIndex + 1) % reviews.Length;
+            rightIndex = (rightIndex + 1) % reviews.Count;
             AddToTicker(reviews[rightIndex]);
         }
     }
 
-    void AddToTicker(string review)
+    void TryAssignReviewsFromManager()
+    {
+        if (ReviewManager.Instance != null && ReviewManager.Instance.currentReviews != null)
+        {
+            reviews = ReviewManager.Instance.currentReviews;
+        }
+        else if (reviews == null)
+        {
+            reviews = new List<CustomerReview>();
+        }
+    }
+
+    void AddToTicker(CustomerReview review)
     {
         currReview = Instantiate(reviewPrefab, transform);
         currReview.Initialize(width, pixelsPerSecond, review);
     }
+
+    public void HandleReviewAdded(CustomerReview review)
+    {
+        if (reviews == null)
+        {
+            Debug.Log("In function 1 called");
+            reviews = new List<CustomerReview>();
+        }
+
+        if (!ReferenceEquals(reviews, ReviewManager.Instance.currentReviews))
+        {
+            Debug.Log("In function 2 called");
+            reviews.Add(review);
+        }
+
+        if (currReview == null && reviews.Count > 0)
+        {
+            Debug.Log("In function 3 called");
+            rightIndex = reviews.Count - 1;
+            AddToTicker(reviews[rightIndex]);
+        }
+    }
+
+    // Methods that were originally in review manager
 }
